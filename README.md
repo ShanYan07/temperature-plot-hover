@@ -75,6 +75,7 @@ The **Python script** then reads the Numbers file and renders an interactive plo
    ```bash
    python3 temperature_plot_with_hover.py temperature_chart.numbers
    ```
+<img width="1397" alt="截屏2025-06-07 下午3 31 45" src="https://github.com/user-attachments/assets/4a5bdbbb-f823-4f99-8a36-7b953fb33712" />
 
 ---
 

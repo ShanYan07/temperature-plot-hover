@@ -23,7 +23,7 @@ The **Python script** then reads the Numbers file and renders an interactive plo
 ## Requirements
 
 - **iOS Device** (iPhone/iPad) on same Apple ID as macOS, **no lock‑screen passcode** to allow unlocked automations.
-- **iCloud Numbers** document with a table containing two columns: `时间` and `温度`.
+- **iCloud Numbers** document with a table containing two columns: `Time` and `Temp`.
 - **macOS** with Python 3 and packages:
   ```bash
   pip3 install pandas matplotlib openpyxl numbers-parser

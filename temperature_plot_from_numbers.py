@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 # temperature_plot_with_hover.py
 #
-# 功能：
-#   - 从 Numbers 文件读取“时间”和“温度”列；
-#   - 绘制温度随时间变化折线图：
-#       • 每 30 分钟主刻度；
-#       • 每日 00:00 红色虚线标记；
-#       • 横轴上方居中显示每天日期；
-#       • 鼠标悬停采样点时显示对话气泡，包含时间、温度及当前斜率（°C/小时）。
+# Functionality:
+#   - Reads "Time" and "Temperature" columns from a Numbers file;
+#   - Plots a time series line chart of temperature:
+#       • Major ticks every 30 minutes;
+#       • Red dashed line at 00:00 each day;
+#       • Date labels centered above the x-axis;
+#       • Tooltip on hover showing time, temperature, and slope (°C/hour).
 #
-# 使用：
+# Usage:
 #   pip3 install pandas matplotlib openpyxl numbers-parser
-#   python3 temperature_plot_with_hover.py 空白.numbers
+#   python3 temperature_plot_with_hover.py blank.numbers
 
 import sys
 import pandas as pd
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import matplotlib
-matplotlib.use('TkAgg')  # 使用 TkAgg 后端以支持交互
+matplotlib.use('TkAgg')  # Use TkAgg backend for interactivity
 
 from numbers_parser import Document
 
@@ -39,7 +39,7 @@ def read_numbers(path):
     rows = table.rows()
     header_idx, headers = find_header_row(rows)
     if header_idx is None:
-        raise RuntimeError("未找到包含“时间”和“温度”的表头行")
+        raise RuntimeError('Header row containing "时间" and "温度" not found.')
     idx_time = headers.index("时间")
     idx_temp = next(i for i, h in enumerate(headers) if isinstance(h, str) and "温度" in h)
     data = []
@@ -47,85 +47,84 @@ def read_numbers(path):
         if r[idx_time] and r[idx_temp]:
             data.append((r[idx_time].value, r[idx_temp].value))
     if not data:
-        raise RuntimeError("数据行为空")
-    return pd.DataFrame(data, columns=["时间", "温度"])
+        raise RuntimeError("No data rows found.")
+    return pd.DataFrame(data, columns=["Time", "Temperature"])
 
 
 def format_annotation(ts, temp, slope):
-    return f"{ts.strftime('%Y-%m-%d %H:%M:%S')}\n温度: {temp:.1f}°C\n斜率: {slope:+.2f} °C/h"
+    return f"{ts.strftime('%Y-%m-%d %H:%M:%S')}\nTemp: {temp:.1f}°C\nSlope: {slope:+.2f} °C/h"
 
 
 def main():
     if len(sys.argv) != 2:
-        print(f"用法: {sys.argv[0]} <.numbers 文件路径>")
+        print(f"Usage: {sys.argv[0]} <path to .numbers file>")
         sys.exit(1)
     path = sys.argv[1]
 
-    # 读取并处理数据
+    # Read and preprocess data
     df = read_numbers(path)
     df = df.dropna().copy()
     try:
-        df["时间"] = pd.to_datetime(df["时间"], format="%Y年%m月%d日 %H:%M")
+        df["Time"] = pd.to_datetime(df["Time"], format="%Y年%m月%d日 %H:%M")
     except:
-        df["时间"] = pd.to_datetime(df["时间"])
-    df["温度"] = df["温度"].astype(str).str.replace("°C", "", regex=False).astype(float)
-    df = df.sort_values("时间").reset_index(drop=True)
+        df["Time"] = pd.to_datetime(df["Time"])
+    df["Temperature"] = df["Temperature"].astype(str).str.replace("°C", "", regex=False).astype(float)
+    df = df.sort_values("Time").reset_index(drop=True)
 
-    # 绘图设置
+    # Plotting settings
     plt.rcParams["font.sans-serif"] = ["Arial Unicode MS"]
     plt.rcParams["axes.unicode_minus"] = False
 
     fig, ax = plt.subplots(figsize=(12, 6))
-    x_dates = df["时间"]
-    y = df["温度"]
+    x_dates = df["Time"]
+    y = df["Temperature"]
     x = mdates.date2num(x_dates)
     line = ax.plot(x, y, '-o', color="tab:blue", picker=5)[0]
 
-    # 坐标轴设置
+    # Axis settings
     ax.set_ylim(17, 33)
     ax.set_yticks(np.arange(18, 32.1, 0.5))
-    ax.set_ylabel("温度 (°C)")
+    ax.set_ylabel("Temperature (°C)")
     tmin, tmax = x.min(), x.max()
     ax.set_xlim(tmin, tmax)
-    # 恢复每 30 分钟一个主刻度
     ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=30))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
     plt.xticks(rotation=45)
 
-    # 每日 00:00 红虚线
-    dates = df["时间"].dt.date.unique()
+    # Red dashed line at 00:00 each day
+    dates = df["Time"].dt.date.unique()
     for d in dates:
         mid = pd.to_datetime(f"{d} 00:00:00")
         num = mdates.date2num(mid)
         if tmin <= num <= tmax:
             ax.axvline(num, color="red", linewidth=2, linestyle="--")
 
-    # 横轴上方居中显示每天日期
+    # Centered date labels above x-axis
     y_label_pos = 18.2
-    for d, group in df.groupby(df["时间"].dt.date):
-        start = mdates.date2num(group["时间"].iloc[0])
-        end = mdates.date2num(group["时间"].iloc[-1])
+    for d, group in df.groupby(df["Time"].dt.date):
+        start = mdates.date2num(group["Time"].iloc[0])
+        end = mdates.date2num(group["Time"].iloc[-1])
         mid = start + (end - start) / 2
         ax.text(mid, y_label_pos, d.strftime("%Y-%m-%d"), ha="center", va="bottom", fontsize=9, backgroundcolor="white", clip_on=True)
 
-    # 注释框初始化
+    # Annotation box setup
     annot = ax.annotate("", xy=(0, 0), xytext=(10, 10), textcoords="offset points",
                         bbox=dict(boxstyle="round,pad=0.5", fc="w", ec="gray"),
                         arrowprops=dict(arrowstyle="->"))
     annot.set_visible(False)
 
     def compute_slope(idx):
-        # 使用中心差分估算斜率 (°C/h)
+        # Estimate slope (°C/hour) using central difference
         if idx <= 0:
             idx0, idx1 = 0, 1
         elif idx >= len(df) - 1:
             idx0, idx1 = len(df) - 2, len(df) - 1
         else:
             idx0, idx1 = idx - 1, idx + 1
-        t0 = df["时间"].iloc[idx0]
-        t1 = df["时间"].iloc[idx1]
-        y0 = df["温度"].iloc[idx0]
-        y1 = df["温度"].iloc[idx1]
+        t0 = df["Time"].iloc[idx0]
+        t1 = df["Time"].iloc[idx1]
+        y0 = df["Temperature"].iloc[idx0]
+        y1 = df["Temperature"].iloc[idx1]
         hours = (t1 - t0).total_seconds() / 3600
         if hours == 0:
             return 0.0
@@ -155,7 +154,7 @@ def main():
 
     fig.canvas.mpl_connect("motion_notify_event", hover)
 
-    plt.title("温度随时间变化（悬停显示详情 + 斜率 + 日期标注 + 00:00 标记）")
+    plt.title("Temperature Over Time (Hover to Show Details + Slope + Date + 00:00 Mark)")
     plt.tight_layout()
     plt.show()
 

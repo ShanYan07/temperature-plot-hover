@@ -1,7 +1,7 @@
-This repository provides:
+##This repository provides:
 
 - **iOS Shortcut** to periodically read a HomeKit temperature sensor and append timestamped readings to an iCloud Numbers document.
-- **Python script** (`temperature_plot_from_numbers.py`) to read that Numbers file, generate an interactive temperature-vs-time plot with:
+- **Python script** (`temperature_plot_with_hover.py`) to read that Numbers file, generate an interactive temperature-vs-time plot with:
   - 30‑minute major ticks on the x‑axis
   - Red dashed line at daily midnight (00:00)
   - Date labels centered above each day
@@ -23,7 +23,7 @@ The **Python script** then reads the Numbers file and renders an interactive plo
 ## Requirements
 
 - **iOS Device** (iPhone/iPad) on same Apple ID as macOS, **no lock‑screen passcode** to allow unlocked automations.
-- **iCloud Numbers** document with a table containing two columns: `Time` and `Temp`.
+- **iCloud Numbers** document with a table containing two columns: `时间` and `温度`.
 - **macOS** with Python 3 and packages:
   ```bash
   pip3 install pandas matplotlib openpyxl numbers-parser

@@ -1,6 +1,3 @@
-# Writing README.md to file for user to download
-readme_content = """# Interactive Temperature Plot from Numbers
-
 This repository provides:
 
 - **iOS Shortcut** to periodically read a HomeKit temperature sensor and append timestamped readings to an iCloud Numbers document.
